@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Secret Image Unlock by DOB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            max-width: 800px;
+            width: 90%;
+            margin: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .code-input {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .code-input:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .image-container {
+            transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: scale(0.8);
+            opacity: 0;
+        }
+        
+        .image-container.visible {
+            transform: scale(1);
+            opacity: 1;
+        }
+        
+        .secret-image {
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .secret-image:hover {
+            transform: translateY(-5px);
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        .shake {
+            animation: shake 0.5s ease;
+        }
+        
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating background particles -->
+    <div class="floating-particles" id="particles"></div>
+    
+    <div class="container">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">Secret Image Vault</h1>
+            <p class="text-gray-600">Enter your Date of Birth (YYYY-MM-DD) to unlock the hidden image</p>
+        </div>
+        
+        <div class="mb-8">
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <input 
+                    type="text" 
+                    id="dobInput" 
+                    placeholder="Enter your Date of Birth (YYYY-MM-DD)" 
+                    class="code-input w-full sm:w-80 px-6 py-4 border-2 border-purple-200 rounded-full text-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300"
+                >
+                <button 
+                    onclick="checkDOB()" 
+                    class="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold rounded-full hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transform hover:scale-105 transition-all duration-300"
+                >
+                    Unlock Image
+                </button>
+            </div>
+            <p id="message" class="text-center mt-4 text-sm text-gray-500"></p>
+        </div>
+        
+        <div id="imageContainer" class="image-container">
+            <div class="text-center">
+                <img 
+                    id="secretImage" 
+                    src="https://placehold.co/600x400" 
+                    alt="Hidden treasure revealed: A stunning landscape with mountains and lakes under golden sunset lighting"
+                    class="secret-image mx-auto w-full max-w-md"
+                    onerror="this.src='https://placehold.co/600x400/667eea/ffffff?text=Image+Loading+Error'"
+                >
+                <p class="mt-4 text-gray-600">Congratulations! You've unlocked the secret image!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 20;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                // Random properties
+                const size = Math.random() * 10 + 5;
+                const left = Math.random() * 100;
+                const top = Math.random() * 100;
+                const delay = Math.random() * 5;
+                const duration = Math.random() * 3 + 3;
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${left}%`;
+                particle.style.top = `${top}%`;
+                particle.style.animationDelay = `${delay}s`;
+                particle.style.animationDuration = `${duration}s`;
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // Secret DOB to unlock image (format: YYYY-MM-DD)
+        const SECRET_DOB = "2063-06-16"; // Change this to your desired DOB
+        const SECRET_IMAGE_URL = "https://i.postimg.cc/Wbg0mv0L/aifaceswap-27eac7ada985c030395e37e5a52280cb.jpg"; // Change this to your image URL
+        
+        // Validate date format YYYY-MM-DD
+        function isValidDate(dateString) {
+            const regex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!regex.test(dateString)) return false;
+            const date = new Date(dateString);
+            if (Number.isNaN(date.getTime())) return false;
+            // Check if dateString matches date.toISOString() slice
+            return date.toISOString().slice(0,10) === dateString;
+        }
+        
+        function checkDOB() {
+            const input = document.getElementById('dobInput');
+            const message = document.getElementById('message');
+            const imageContainer = document.getElementById('imageContainer');
+            const secretImage = document.getElementById('secretImage');
+            const dob = input.value.trim();
+            
+            if (!isValidDate(dob)) {
+                message.textContent = "Please enter a valid date in YYYY-MM-DD format.";
+                message.className = "text-center mt-4 text-sm text-red-600";
+                input.classList.add('shake');
+                setTimeout(() => input.classList.remove('shake'), 500);
+                input.focus();
+                return;
+            }
+            
+            if (dob === SECRET_DOB) {
+                message.textContent = "Date of Birth accepted! Revealing image...";
+                message.className = "text-center mt-4 text-sm text-green-600";
+                
+                secretImage.src = SECRET_IMAGE_URL;
+                
+                setTimeout(() => {
+                    imageContainer.classList.add('visible');
+                    message.textContent = "";
+                }, 1000);
+            } else {
+                message.textContent = "Incorrect Date of Birth. Please try again.";
+                message.className = "text-center mt-4 text-sm text-red-600";
+                input.classList.add('shake');
+                setTimeout(() => input.classList.remove('shake'), 500);
+                input.value = "";
+                input.focus();
+            }
+        }
+        
+        // Allow Enter key to submit
+        document.getElementById('dobInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkDOB();
+            }
+        });
+        
+        // Initialize particles on load
+        window.addEventListener('load', createParticles);
+        
+        // Preload the placeholder image
+        window.addEventListener('load', function() {
+            const img = new Image();
+            img.src = SECRET_IMAGE_URL;
+        });
+    </script>
+</body>
+</html>
